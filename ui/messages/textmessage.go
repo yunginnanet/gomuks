@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"maunium.net/go/gomuks/matrix/muksevt"
+	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mauview"
 
 	"maunium.net/go/gomuks/config"
@@ -61,8 +62,8 @@ func (msg *TextMessage) Clone() MessageRenderer {
 
 func (msg *TextMessage) getCache(uiMsg *UIMessage) tstring.TString {
 	if msg.cache == nil {
-		switch uiMsg.Type {
-		case "m.emote":
+		switch string(uiMsg.Type) {
+		case string(event.MsgEmote), event.CallInvite.Type, event.CallReject.Type, event.CallHangup.Type:
 			msg.cache = tstring.NewColorTString(fmt.Sprintf("* %s %s", uiMsg.SenderName, msg.Text), uiMsg.TextColor())
 			msg.cache.Colorize(0, len(uiMsg.SenderName)+2, uiMsg.SenderColor())
 		default:

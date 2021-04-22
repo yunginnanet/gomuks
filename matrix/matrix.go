@@ -357,6 +357,13 @@ func (c *Container) OnLogin() {
 	} else {
 		c.syncer.OnEventType(event.EventEncrypted, c.HandleEncryptedUnsupported)
 	}
+	c.syncer.OnEventType(event.CallInvite, c.HandleCall)
+	c.syncer.OnEventType(event.CallCandidates, c.HandleCall)
+	c.syncer.OnEventType(event.CallAnswer, c.HandleCall)
+	c.syncer.OnEventType(event.CallReject, c.HandleCall)
+	c.syncer.OnEventType(event.CallSelectAnswer, c.HandleCall)
+	c.syncer.OnEventType(event.CallNegotiate, c.HandleCall)
+	c.syncer.OnEventType(event.CallHangup, c.HandleCall)
 	c.syncer.OnEventType(event.EventMessage, c.HandleMessage)
 	c.syncer.OnEventType(event.EventSticker, c.HandleMessage)
 	c.syncer.OnEventType(event.EventReaction, c.HandleMessage)
@@ -593,6 +600,8 @@ func (c *Container) HandleEncrypted(source mautrix.EventSource, mxEvent *event.E
 		} else {
 			debug.Printf("[Crypto/Debug] Processed in-room verification event %s of type %s", evt.ID, evt.Type.String())
 		}
+	} else if evt.Type.IsCall() {
+		c.HandleCall(source, evt)
 	} else {
 		c.HandleMessage(source, evt)
 	}
@@ -660,6 +669,13 @@ func (c *Container) HandleMessage(source mautrix.EventSource, mxEvent *event.Eve
 		}
 	} else {
 		debug.Printf("Parsing event %s type %s %v from %s in %s failed (ParseEvent() returned nil).", evt.ID, evt.Type.Repr(), evt.Content.Raw, evt.Sender, evt.RoomID)
+	}
+}
+
+func (c *Container) HandleCall(source mautrix.EventSource, evt *event.Event) {
+	if evt.Type == event.CallInvite || evt.Type == event.CallReject || evt.Type == event.CallHangup {
+		// Add to UI
+		c.HandleMessage(source, evt)
 	}
 }
 
@@ -918,7 +934,7 @@ func (c *Container) Redact(roomID id.RoomID, eventID id.EventID, reason string) 
 	return err
 }
 
-// SendMessage sends the given event.
+// SendEvent sends the given event.
 func (c *Container) SendEvent(evt *muksevt.Event) (id.EventID, error) {
 	defer debug.Recover()
 

@@ -68,7 +68,7 @@ type UIMessage struct {
 	EventID            id.EventID
 	TxnID              string
 	Relation           event.RelatesTo
-	Type               event.MessageType
+	Type               string
 	SenderID           id.UserID
 	SenderName         string
 	DefaultSenderColor tcell.Color
@@ -96,9 +96,9 @@ const TimeFormat = "15:04:05"
 
 func newUIMessage(evt *muksevt.Event, displayname string, renderer MessageRenderer) *UIMessage {
 	msgContent := evt.Content.AsMessage()
-	msgtype := msgContent.MsgType
+	msgtype := string(msgContent.MsgType)
 	if len(msgtype) == 0 {
-		msgtype = event.MessageType(evt.Type.String())
+		msgtype = evt.Type.String()
 	}
 
 	reactions := make(ReactionSlice, 0, len(evt.Unsigned.Relations.Annotations.Map))
@@ -169,7 +169,7 @@ func (msg *UIMessage) Sender() string {
 		return "Error"
 	}
 	switch msg.Type {
-	case "m.emote":
+	case string(event.MsgEmote), event.CallInvite.Type, event.CallReject.Type, event.CallHangup.Type:
 		// Emotes don't show a separate sender, it's included in the buffer.
 		return ""
 	default:
@@ -210,7 +210,7 @@ func (msg *UIMessage) SenderColor() tcell.Color {
 	switch {
 	case stateColor != tcell.ColorDefault:
 		return stateColor
-	case msg.Type == "m.room.member":
+	case msg.Type == event.StateMember.Type:
 		return widget.GetHashColor(msg.SenderName)
 	case msg.IsService:
 		return tcell.ColorGray
@@ -225,11 +225,11 @@ func (msg *UIMessage) TextColor() tcell.Color {
 	switch {
 	case stateColor != tcell.ColorDefault:
 		return stateColor
-	case msg.IsService, msg.Type == "m.notice":
+	case msg.IsService, msg.Type == string(event.MsgNotice):
 		return tcell.ColorGray
 	case msg.IsHighlight:
 		return tcell.ColorYellow
-	case msg.Type == "m.room.member":
+	case msg.Type == event.StateMember.Type:
 		return tcell.ColorGreen
 	default:
 		return tcell.ColorDefault

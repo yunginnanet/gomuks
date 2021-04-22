@@ -89,6 +89,12 @@ func directParseEvent(matrix ifc.MatrixContainer, room *rooms.Room, evt *muksevt
 		return ParseStateEvent(evt, displayname)
 	case *event.MemberEventContent:
 		return ParseMembershipEvent(room, evt)
+	case *event.CallInviteEventContent:
+		return NewTextMessage(evt, displayname, "placed a call.")
+	case *event.CallRejectEventContent:
+		return NewTextMessage(evt, displayname, "rejected the call.")
+	case *event.CallHangupEventContent:
+		return NewTextMessage(evt, displayname, "ended the call.")
 	default:
 		debug.Printf("Unknown event content type %T in directParseEvent", content)
 		return nil

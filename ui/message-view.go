@@ -376,7 +376,7 @@ func (view *MessageView) handleUsernameClick(message *messages.UIMessage, prevMe
 	//	return false
 	//}
 
-	if message.SenderName == "---" || message.SenderName == "-->" || message.SenderName == "<--" || message.Type == event.MsgEmote {
+	if message.SenderName == "---" || message.SenderName == "-->" || message.SenderName == "<--" || message.Type == string(event.MsgEmote) {
 		return false
 	}
 
@@ -580,7 +580,7 @@ func (view *MessageView) CapturePlaintext(height int) string {
 			var sender string
 			if len(message.Sender()) > 0 {
 				sender = fmt.Sprintf(" <%s>", message.Sender())
-			} else if message.Type == event.MsgEmote {
+			} else if message.Type == string(event.MsgEmote) {
 				sender = fmt.Sprintf(" * %s", message.SenderName)
 			}
 			fmt.Fprintf(&buf, "%s%s %s\n", message.FormatTime(), sender, message.PlainText())
