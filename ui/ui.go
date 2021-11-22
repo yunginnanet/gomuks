@@ -63,6 +63,8 @@ func NewGomuksUI(gmx ifc.Gomuks) ifc.GomuksUI {
 }
 
 func (ui *GomuksUI) Init() {
+	mauview.Backspace2RemovesWord = ui.gmx.Config().Backspace2RemovesWord
+	mauview.Backspace1RemovesWord = ui.gmx.Config().Backspace1RemovesWord
 	clipboard.Initialize()
 	ui.views = map[View]mauview.Component{
 		ViewLogin: ui.NewLoginView(),
